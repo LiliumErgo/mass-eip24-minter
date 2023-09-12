@@ -16,12 +16,14 @@ class ContractCompile(ctx: BlockchainContext) {
 
   def compileProxyContract(
       contract: String,
-      minerFee: Long
+      height: Long,
+      spender: Address
   ): ErgoContract = {
     this.ctx.compileContract(
       ConstantsBuilder
         .create()
-        .item("_minerFee", minerFee)
+        .item("$height", height)
+        .item("$spender", spender.getPublicKey)
         .build(),
       contract
     )

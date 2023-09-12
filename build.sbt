@@ -1,10 +1,10 @@
 scalaVersion := "2.12.16"
 
-name := "yourProject-offchain-bot"
-organization := "com.yourProject"
-version := "1.2.0"
+name := "Mass-EIP-24-Minter"
+organization := "io.liliumergo"
+version := "1.0.0"
 
-ThisBuild / version := "1.1.0"
+ThisBuild / version := "1.0.0"
 
 // Note, it's not required for you to define these three settings. These are
 // mostly only necessary if you intend to publish your library's binaries on a
@@ -78,7 +78,7 @@ assemblyMergeStrategy in assembly := {
 
 assemblyJarName in assembly := s"yourProject-offchain-${version.value}.jar"
 assemblyOutputPath in assembly := file(
-  s"./yourProject-offchain-${version.value}.jar/"
+  s"./Mass-EIP-24-Minter-${version.value}.jar/"
 )
 mainClass in assembly := Some("app.Main")
 mainClass := Some("app.Main")

@@ -34,3 +34,6 @@ project/metals.sbt
 # vs code
 .vscode
 serviceOwner.json
+collection.json
+final_meta_1.json
+metadata.json

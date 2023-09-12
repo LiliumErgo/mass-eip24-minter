@@ -1,7 +1,7 @@
 package utils
 
+import org.ergoplatform.appkit.{Address, BlockchainContext, Eip4Token, ErgoContract, ErgoValue, InputBox, OutBox}
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
-import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.ErgoToken
 import work.lithos.plasma.collections.LocalPlasmaMap
 
@@ -211,6 +211,44 @@ class OutBoxes(ctx: BlockchainContext) {
     this.txBuilder
       .outBoxBuilder()
       .value(amount)
+      .contract(
+        new ErgoTreeContract(
+          senderAddress.getErgoAddress.script,
+          this.ctx.getNetworkType
+        )
+      )
+      .build()
+  }
+
+  def buildIssuerBox(
+      senderAddress: Address,
+      registers: Array[ErgoValue[_]],
+      amount: Long = minAmount
+  ): OutBox = {
+    this.txBuilder
+      .outBoxBuilder()
+      .value(amount)
+      .registers(registers: _*)
+      .contract(
+        new ErgoTreeContract(
+          senderAddress.getErgoAddress.script,
+          this.ctx.getNetworkType
+        )
+      )
+      .build()
+  }
+
+  def buildEIP24IssuerBox(
+      senderAddress: Address,
+      registers: Array[ErgoValue[_]],
+      collectionToken: ErgoToken,
+      amount: Long = minAmount
+  ): OutBox = {
+    this.txBuilder
+      .outBoxBuilder()
+      .value(amount)
+      .registers(registers: _*)
+      .tokens(collectionToken)
       .contract(
         new ErgoTreeContract(
           senderAddress.getErgoAddress.script,

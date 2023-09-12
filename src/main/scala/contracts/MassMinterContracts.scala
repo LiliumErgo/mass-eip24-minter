@@ -5,7 +5,7 @@ import enumeratum._
 import scala.collection.immutable
 import scala.io.Source
 
-sealed trait YourProjectContracts extends EnumEntry {
+sealed trait MassMinterContracts extends EnumEntry {
   // Top Folder
   val domain: String = ""
   // Sub Folder
@@ -52,24 +52,17 @@ sealed trait YourProjectContracts extends EnumEntry {
   }
 }
 
-object YourProjectContracts extends Enum[YourProjectContracts] {
-  val values: immutable.IndexedSeq[YourProjectContracts] = findValues
-  case object StateContract extends NFTBoxGuardScriptContract
-  case object IssuerContract extends NFTBoxGuardScriptContract
-  case object CollectionIssuer extends NFTBoxGuardScriptContract
-  case object CollectionIssuance extends NFTBoxGuardScriptContract
-  case object SingletonIssuer extends NFTBoxGuardScriptContract
-  case object SingletonIssuance extends NFTBoxGuardScriptContract
-  case object AVLdebug extends NFTBoxGuardScriptContract
+object MassMinterContracts extends Enum[MassMinterContracts] {
+  val values: immutable.IndexedSeq[MassMinterContracts] = findValues
   case object ProxyContract extends ProxyContractBoxGuardScriptContract
 }
 
-sealed trait NFTContract extends YourProjectContracts {
-  override val domain: String = "YourProject"
+sealed trait NFTContract extends MassMinterContracts {
+  override val domain: String = "MassMinter"
 }
 
-sealed trait ProxyContract extends YourProjectContracts {
-  override val domain: String = "YourProject"
+sealed trait ProxyContract extends MassMinterContracts {
+  override val domain: String = "MassMinter"
 }
 
 //</editor-fold>
