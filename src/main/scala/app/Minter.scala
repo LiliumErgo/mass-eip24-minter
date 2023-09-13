@@ -4,9 +4,15 @@ import configs.{collectionParser, masterMeta, serviceOwnerConf}
 import contracts.MassMinterContracts
 import execute.Client
 import org.ergoplatform.Input
-import org.ergoplatform.appkit.{InputBox, SignedTransaction}
+import org.ergoplatform.appkit.{Address, InputBox, SignedTransaction}
 import transcoder.encoderHelper
-import utils.{BoxAPI, ContractCompile, TransactionHelper, explorerApi}
+import utils.{
+  BoxAPI,
+  ContractCompile,
+  DatabaseAPI,
+  TransactionHelper,
+  explorerApi
+}
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -97,12 +103,16 @@ object Minter extends App {
   private val minerErgoTree =
     "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304"
 
-  println(proxyContract.toAddress.toString)
+  private val recipient =
+    Address.create("9iL4mMos5DuC7cBj6zAZr5yyqMjZUESH748kxG4Gdsr3ZR3TeBR")
+//  println(proxyContract.toAddress.toString)
+
+  private val writeToDatabase = false
 
   val boxes =
     boxAPIObj
       .getUnspentBoxesFromApi(
-        proxyContract.toAddress.toString,
+        txHelper.senderAddress.toString,
         selectAll = true
       )
       .items
@@ -174,6 +184,29 @@ object Minter extends App {
           .size() > 0
       ) {
         issuanceInputs.append(output)
+
+        if (writeToDatabase) {
+
+          var success = false
+          while (!success) {
+            try {
+              val resp = DatabaseAPI.createMintEntry(
+                output.getId.toString(),
+                issuances.getId,
+                "empty"
+              )
+              if (resp >= 200 && resp < 300) {
+                success = true
+              }
+            } catch {
+              case e: Exception =>
+                println(
+                  s"Exception while writing issuer id to supabase: ${e.getMessage}"
+                )
+                Thread.sleep(1000) // sleep for 1 second
+            }
+          }
+        }
       }
     }
   }
@@ -185,15 +218,39 @@ object Minter extends App {
         val mintTx = txHelper.mintEip24Nft(
           issuer,
           metadataConfig(index),
-          minBoxValue
+          minBoxValue,
+          recipient
         )
         val txHash = txHelper.sendTx(mintTx)
         println(s"mint tx #${index + 1}: " + txHash)
+
+        if (writeToDatabase) {
+          var supaBaseSuccess = false
+          while (!supaBaseSuccess) {
+            try {
+              val resp = DatabaseAPI.updateMintEntry(
+                issuer.getId.toString(),
+                mintTx.getId.toString
+              )
+              if (resp >= 200 && resp < 300) {
+                supaBaseSuccess = true
+              }
+            } catch {
+              case e: Exception =>
+                println(
+                  s"Exception while writing mint to supabase: ${e.getMessage}"
+                )
+                Thread.sleep(10000) // sleep for 1 second
+            }
+          }
+        }
+
         success = true
+
       } catch {
         case e: Exception =>
           println(s"Exception while minting tx #${index + 1}: ${e.getMessage}")
-          Thread.sleep(10000) // sleep for 10 seconds
+          Thread.sleep(60000) // sleep for 60 seconds
       }
     }
   }
