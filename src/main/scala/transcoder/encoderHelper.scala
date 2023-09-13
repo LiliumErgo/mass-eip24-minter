@@ -1,8 +1,12 @@
 package transcoder
 
 import configs.Collection
-import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.{Address, ErgoValue}
+import org.ergoplatform.appkit.scalaapi.ErgoValueBuilder
+import sigmastate.eval.Colls
+import special.collection.Coll
 
+import java.nio.charset.StandardCharsets
 import java.util
 import java.util.{Map => JMap}
 import scala.collection.JavaConverters._
@@ -40,23 +44,49 @@ class encoderHelper(collectionFile: Collection) {
   }
 
   def getEmptyAdditionalInfo: String = {
-    encoder.getEmptyAdditionalInfo.toHex
+    "0c3c0e0e010000"
   }
 
   def encodeMetadata(
-      explicit: Boolean,
+      explicit: java.lang.Boolean,
       textualTraitsMap: mutable.LinkedHashMap[String, String],
       levelsMap: mutable.LinkedHashMap[String, (Int, Int)],
       statsMap: mutable.LinkedHashMap[String, (Int, Int)]
   ): String = {
-    encoder
-      .encodeMetaData(
-        explicit,
-        textualTraitsMap,
-        levelsMap,
-        statsMap
+    val textualTraitsArrayList =
+      new util.ArrayList[(Coll[Byte], Coll[Byte])]()
+    val levelsArrayList = new util.ArrayList[(Coll[Byte], (Int, Int))]()
+    val statsArrayList = new util.ArrayList[(Coll[Byte], (Int, Int))]()
+
+    for (element <- textualTraitsMap.keySet) {
+      val key = Colls.fromArray(element.getBytes(StandardCharsets.UTF_8))
+      val value = Colls.fromArray(
+        textualTraitsMap(element).getBytes(StandardCharsets.UTF_8)
       )
-      .toHex
+      textualTraitsArrayList.add((key, value))
+    }
+
+    for (element <- levelsMap.keySet) {
+      val key = Colls.fromArray(element.getBytes(StandardCharsets.UTF_8))
+      val value = levelsMap(element)
+      levelsArrayList.add((key, value))
+    }
+
+    for (element <- statsMap.keySet) {
+      val key = Colls.fromArray(element.getBytes(StandardCharsets.UTF_8))
+      val value = statsMap(element)
+      statsArrayList.add((key, value))
+    }
+
+    val cleanMeta = (
+      Colls.fromArray(textualTraitsArrayList.asScala.toArray),
+      (
+        Colls.fromArray(levelsArrayList.asScala.toArray),
+        Colls.fromArray(statsArrayList.asScala.toArray)
+      )
+    )
+
+    ErgoValueBuilder.buildFor(cleanMeta).toHex
   }
 
   def encodeRoyalty: String = {
