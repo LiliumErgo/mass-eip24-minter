@@ -306,7 +306,8 @@ class TransactionHelper(
   def mintEip24Nft(
       input: InputBox,
       metadata: Data,
-      boxValue: Long
+      boxValue: Long,
+      recipient: Address
   ): SignedTransaction = {
     val outBoxObj = new OutBoxes(this.ctx)
 
@@ -320,13 +321,13 @@ class TransactionHelper(
 
     val nftOutBox = outBoxObj.NFToutBox(
       nft,
-      this.senderAddress,
+      recipient,
       boxValue
     )
 
     val tokenOut = outBoxObj.tokenOutBox(
       Seq(input.getTokens.get(0)),
-      this.senderAddress
+      recipient
     )
 
     val unsignedTransaction =
