@@ -1,6 +1,14 @@
 package utils
 
-import org.ergoplatform.appkit.{Address, BlockchainContext, Eip4Token, ErgoContract, ErgoValue, InputBox, OutBox}
+import org.ergoplatform.appkit.{
+  Address,
+  BlockchainContext,
+  Eip4Token,
+  ErgoContract,
+  ErgoValue,
+  InputBox,
+  OutBox
+}
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.sdk.ErgoToken
 import work.lithos.plasma.collections.LocalPlasmaMap
@@ -56,14 +64,12 @@ class OutBoxes(ctx: BlockchainContext) {
       tokenDecimals: Int
   ): Eip4Token = {
 
-    Eip4TokenBuilder.buildNftPictureToken(
+    Eip4TokenBuilder.buildNftArtworkCollectionToken(
       inputBox.getId.toString,
       tokenAmount,
       name,
       description,
-      tokenDecimals,
-      Array(0.toByte),
-      "link"
+      tokenDecimals
     )
   }
 
